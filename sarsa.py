@@ -1,6 +1,6 @@
 import numpy as np
+# import cupy as np
 import math
-import numpy as np
 
 import torch
 
@@ -63,6 +63,7 @@ class StateActionFeatureVectorWithTile():
             tiling_idx = 0
 
             for tiling_idx in range(0, self.num_tilings, 1):
+                # print(s[0],s[1])
                 # calculate x tile
                 x_tile = (s[0] + abs(self.tiling_start_coords[tiling_idx][0])) // self.tile_width[0]
 
@@ -71,9 +72,11 @@ class StateActionFeatureVectorWithTile():
 
                 # Encode feature vector
                 vec_idx = np.ravel_multi_index((a, tiling_idx, int(x_tile), int(y_tile)), (self.num_actions, self.num_tilings, self.num_tiles_x, self.num_tiles_y))
+                # vec_idx = a + tiling_idx * self.num_actions + int(x_tile) * self.num_actions * self.num_tilings + int(y_tile) * self.num_actions * self.num_tilings * self.num_tiles_x
+                
                 feature_vector[int(vec_idx)] = 1
 
-            return feature_vector
+        return feature_vector
         raise NotImplementedError()
 
 def SarsaLambda(
@@ -88,7 +91,7 @@ def SarsaLambda(
     Implement True online Sarsa(\lambda)
     """
 
-    def epsilon_greedy_policy(s,done,w,epsilon=.1):
+    def epsilon_greedy_policy(s,done,w,epsilon=0.1):
         nA = env.action_space.n
         Q = [np.dot(w, X(s,done,a)) for a in range(nA)]
         # Q = np.dot(w, X(s,done,w))
@@ -96,27 +99,32 @@ def SarsaLambda(
         if np.random.rand() < epsilon:
             return np.random.randint(nA)
         else:
+            # if(Q[0] == Q[1]):
+            #     return np.random.randint(nA)
             return np.argmax(Q)
 
     def reward_func(R, done, score, score_prev, S, S_prime):
         if not done:
+            R = 0
             if(score > score_prev):
-                R = 5
+                R = 1
                 score_prev = score
-            else:
-                # R = 0
-                if abs(S[1]) < abs(S_prime[1]):
-                    R = 0
-                else:
-                    R = .1
+            # else:
+            #     R = 0.1
+                # if abs(S[1]) < abs(S_prime[1]):
+                #     R = 0
+                # else:
+                #     R = .01
+            # if abs(S[1]) < abs(S_prime[1]):
+            #         R = 0.5
         else:
-            R = -10
+            R = 0
+            # R = -1000
         return R, score_prev
 
     w = np.zeros((X.feature_vector_len()))
     # w = np.load('weights 70.npy')
 
-    #TODO: implement this function
     for episode in range(0, num_episode, 1):
 
         print(episode, "/", num_episode, end='\r')
@@ -126,10 +134,12 @@ def SarsaLambda(
         S = env.reset()
 
         A = epsilon_greedy_policy(S,done, w)
-        # print(A)
+
         x = X(S,done,A)
         # print(x.shape)
+
         z = np.zeros((X.feature_vector_len()))
+
         Q_old = 0
 
         # step = 0
@@ -138,7 +148,11 @@ def SarsaLambda(
             # print(step)
             S_prime, R, done, info = env.step(A)
             score = info['score']
-            R, score_prev = reward_func(R, done, score, score_prev, S, S_prime)
+            # R, score_prev = reward_func(R, done, score, score_prev, S, S_prime)
+            if R == 1:
+                R = 1
+            else:
+                R = -1000
             A_prime = epsilon_greedy_policy(S_prime, done, w)
             x_prime = X(S_prime, done, A_prime)
             Q = np.dot(x, w)
@@ -149,6 +163,6 @@ def SarsaLambda(
             Q_old = Q_prime
             x = x_prime
             A = A_prime
-            S = S_prime
+            # S = S_prime
             # Break when S' terminal
     return w
