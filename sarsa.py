@@ -1,6 +1,8 @@
 import numpy as np
 # import cupy as np
 import math
+import pandas as pd
+
 
 import torch
 
@@ -91,7 +93,7 @@ def SarsaLambda(
     Implement True online Sarsa(\lambda)
     """
 
-    def epsilon_greedy_policy(s,done,w,epsilon=0.1):
+    def epsilon_greedy_policy(s,done,w,epsilon=0.01):
         nA = env.action_space.n
         Q = [np.dot(w, X(s,done,a)) for a in range(nA)]
         # Q = np.dot(w, X(s,done,w))
@@ -103,31 +105,41 @@ def SarsaLambda(
             #     return np.random.randint(nA)
             return np.argmax(Q)
 
-    def reward_func(R, done, score, score_prev, S, S_prime):
+    def reward_func(R, done, score, score_prev):
         if not done:
-            R = 0
-            if(score > score_prev):
-                R = 1
-                score_prev = score
-            # else:
-            #     R = 0.1
-                # if abs(S[1]) < abs(S_prime[1]):
-                #     R = 0
-                # else:
-                #     R = .01
-            # if abs(S[1]) < abs(S_prime[1]):
-            #         R = 0.5
+            if score > score_prev:
+                return 1, score
+            else:
+                return 0, score_prev
         else:
-            R = 0
-            # R = -1000
-        return R, score_prev
+            return -10, score_prev
+    
+    # def reward_func(R,done):
+    #     if not done:
+    #         return 1
+    #     else:
+    #         return -10
+    
+    # def reward_func(R):
+    #     if R == 1:
+    #         return 1
+    #     else:
+    #         return -1000
+
+    # def reward_func(score, score_prev):
+    #     if score > score_prev:
+    #         return 5, score
+    #     else:
+    #         return 1, score_prev
 
     w = np.zeros((X.feature_vector_len()))
     # w = np.load('weights 70.npy')
+    mean_scores = [0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+    episode = 0
+    while np.mean(mean_scores[-3:]) < 25 or episode > 30000:
+    # for episode in range(0, num_episode, 1):
 
-    for episode in range(0, num_episode, 1):
-
-        print(episode, "/", num_episode, end='\r')
+        print("Episode:", episode, "Avg score: ", np.mean(mean_scores[-3:]), end='\r')
 
         done = False
 
@@ -148,11 +160,9 @@ def SarsaLambda(
             # print(step)
             S_prime, R, done, info = env.step(A)
             score = info['score']
-            # R, score_prev = reward_func(R, done, score, score_prev, S, S_prime)
-            if R == 1:
-                R = 1
-            else:
-                R = -1000
+            R, score_prev = reward_func(R, done, score, score_prev)
+            # R = reward_func(R)
+            # R, score_prev = reward_func(score, score_prev)
             A_prime = epsilon_greedy_policy(S_prime, done, w)
             x_prime = X(S_prime, done, A_prime)
             Q = np.dot(x, w)
@@ -165,4 +175,8 @@ def SarsaLambda(
             A = A_prime
             # S = S_prime
             # Break when S' terminal
+        mean_scores.append(score)
+        episode += 1
+    dataframe = pd.DataFrame(mean_scores) 
+    dataframe.to_csv('scores.csv')
     return w
