@@ -11,31 +11,25 @@ def test_q_learning():
     TEST_MODE = True
 
     env = flappy_bird_gym.make("FlappyBird-v0")
-    gamma = 1
-    # env.observation_space.high = [1.8, .8]
-    # env.observation_space.low = [0, -.8]
 
     env.observation_space.high = [2, 2]
     env.observation_space.low = [-2, -2]
 
     num_actions = env.action_space.n
-    # pi = OptimalPolicy(num_actions)
-    target_score = 3
+    target_score = 5
 
     if not TEST_MODE:
         while True:
             pi = Q_Table(num_actions)
-            # pi, avg_score = n_step_sarsa(env = env, n = 1, alpha = 0.005, gamma = 1, num_episodes = 3000, pi = pi, target_score = target_score, num_consecutive_scores = 3)
-            pi, avg_score = Q_Learning(env = env, gamma = 1, alpha = 0.005, num_actions = num_actions, num_episode = 3000)
+            pi, avg_score = Q_Learning(env = env, gamma = 1, alpha = 0.5, num_actions = num_actions, num_episodes = 3000, target_score = target_score, num_consecutive_scores = 2)
             if avg_score >= target_score:
                 break
 
-        save('q_learning_q_table.npy', pi.get_q())
+        save('Q_Learning/q_learning_q_table.npy', pi.get_q())
     
     if TEST_MODE:
         pi = Q_Table(num_actions)
-        q = load('q_learning_q_table.npy')
-        # q = load('sarsa_q_table_n_2_target_25.npy')
+        q = load('Q_Learning/q_learning_best_q_table.npy')
         pi.set_q_table(q)
 
         scores = []
