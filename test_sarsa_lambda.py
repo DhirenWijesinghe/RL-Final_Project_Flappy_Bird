@@ -1,3 +1,5 @@
+from ast import arg
+from operator import mod
 import numpy as np
 from numpy import save
 from numpy import load
@@ -6,17 +8,22 @@ from SARSA_Lambda.sarsa_lambda import SarsaLambda, StateActionFeatureVectorWithT
 import flappy_bird_gym
 import time
 import statistics as stats
+import sys
 
-# mode = "TEST"
-# mode = "LEARN"
-mode = "SINGLE_GAME"
+args = sys.argv
+if len(args) <= 0:
+    mode = "SINGLE_GAME"
+elif args[1] == '-t':
+    mode = "TEST"
+elif args[1] == '-l':
+    mode = "LEARN"
+else:
+    mode = "SINGLE_GAME"
 
 def test_sarsa_lamda():
 
     env = flappy_bird_gym.make("FlappyBird-v0")
     gamma = 1
-    # env.observation_space.high = [1.8, .8]
-    # env.observation_space.low = [0, -.8]
 
     env.observation_space.high = [2, 2]
     env.observation_space.low = [-2, -2]
@@ -27,23 +34,16 @@ def test_sarsa_lamda():
         env.observation_space.high,
         env.action_space.n,
         num_tilings=4,
-        # tile_width=np.array([.1105,.00875]))
-        # tile_width=np.array([.00875*2,.1105]))
         tile_width=np.array([.1, .1])
-        # tile_width=np.array([.08, .08])
     )
 
     if mode == "LEARN":
-        w = SarsaLambda(env, gamma, 0.75, 0.01, X, 2000)
-        save('weights_lam_0_75.npy', w)
-        # mode = "SINGLE_GAME"
+        w = SarsaLambda(env, gamma, 0.7, 0.01, X, 2000)
+        save('SARSA_Lambda/weights_new.npy', w)
     if mode == "TEST":
-        w = load('weights_lam_0_7.npy')
+        w = load('SARSA_Lambda/weights_lam_0_7.npy')
     if mode == "SINGLE_GAME":
-        w = load('weights_lam_0_7.npy')
-    # w = SarsaLambda(env, gamma, 0.8, 0.01, X, 2000)
-    # w = load('weights_new.npy')
-    # w = load('weights_151.npy')
+        w = load('SARSA_Lambda/weights_lam_0_7.npy')
 
     def greedy_policy(s,done):
         Q = [np.dot(w, X(s,done,a)) for a in range(env.action_space.n)]
@@ -79,21 +79,16 @@ def test_sarsa_lamda():
             action = greedy_policy(obs, done)
             # Processing:
             obs, reward, done, info = env.step(action)
-
-            # Rendering the game:
-            # (remove this two lines during training)
-            # env.render()
-            # time.sleep(1 / 60)  # FPS
             
             # Checking if the player is still alive
             if done:
-                # break
                 avg.append(info['score'])
                 obs = env.reset()
                 ep += 1
-                print(ep)
                 if ep > 2000:
                     break
+        print(np.mean(avg),max(avg), min(avg))
+
     elif mode == "SINGLE_GAME":
         while True:
             # Next action:
@@ -111,11 +106,9 @@ def test_sarsa_lamda():
                 break
 
         # print(info['score'])
-    print(np.mean(avg),max(avg), min(avg))
     env.close()
 
 if __name__ == "__main__":
-    print("Starting")
     test_sarsa_lamda()
 
     
