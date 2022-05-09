@@ -43,7 +43,6 @@ def test_q_learning():
         while True:
             # Next action:
             action = pi.action(obs)
-            # print(action)
             # Processing:
             obs, reward, done, info = env.step(action)
 
@@ -69,7 +68,6 @@ def test_q_learning():
             while True:
                 # Next action:
                 action = pi.action(obs)
-                # print(action)
                 # Processing:
                 obs, reward, done, info = env.step(action)
 
@@ -97,7 +95,6 @@ def test_q_learning():
             while True:
                 # Next action:
                 action = pi.action(obs)
-                # print(action)
                 # Processing:
                 obs, reward, done, info = env.step(action)
 

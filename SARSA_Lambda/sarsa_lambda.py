@@ -3,9 +3,6 @@ import numpy as np
 import math
 import pandas as pd
 
-
-import torch
-
 class StateActionFeatureVectorWithTile():
     def __init__(self,
                  state_low:np.array,
@@ -20,7 +17,6 @@ class StateActionFeatureVectorWithTile():
         num_tilings: # tilings
         tile_width: tile width for each dimension
         """
-        # TODO: implement here
 
         self.state_low = state_low 
         self.state_high = state_high
@@ -30,9 +26,7 @@ class StateActionFeatureVectorWithTile():
 
         self.num_tiles_x = math.ceil((state_high[0] - state_low[0]) / tile_width[0]) + 1
         self.num_tiles_y = math.ceil((state_high[1] - state_low[1]) / tile_width[1]) + 1
-        # print(state_high[0], state_low[0], tile_width[0])
-
-        print(self.num_tiles_x, self.num_tiles_y)
+        # print(self.num_tiles_x, self.num_tiles_y)
 
         self.tiling_start_coords = []
 
@@ -47,7 +41,6 @@ class StateActionFeatureVectorWithTile():
         """
         return dimension of feature_vector: d = num_actions * num_tilings * num_tiles
         """
-        # TODO: implement this 
         return (self.num_actions * self.num_tilings * self.num_tiles_x * self.num_tiles_y)
         raise NotImplementedError()
 
@@ -56,7 +49,6 @@ class StateActionFeatureVectorWithTile():
         implement function x: S+ x A -> [0,1]^d
         if done is True, then return 0^d
         """
-        # TODO: implement this method
         feature_vector = np.zeros((self.feature_vector_len()))
         if done:
             return feature_vector
@@ -65,7 +57,6 @@ class StateActionFeatureVectorWithTile():
             tiling_idx = 0
 
             for tiling_idx in range(0, self.num_tilings, 1):
-                # print(s[0],s[1])
                 # calculate x tile
                 x_tile = (s[0] + abs(self.tiling_start_coords[tiling_idx][0])) // self.tile_width[0]
 
@@ -96,13 +87,9 @@ def SarsaLambda(
     def epsilon_greedy_policy(s,done,w,epsilon=0.01):
         nA = env.action_space.n
         Q = [np.dot(w, X(s,done,a)) for a in range(nA)]
-        # Q = np.dot(w, X(s,done,w))
-        # print(Q)
         if np.random.rand() < epsilon:
             return np.random.randint(nA)
         else:
-            # if(Q[0] == Q[1]):
-            #     return np.random.randint(nA)
             return np.argmax(Q)
 
     def reward_func(R, done, score, score_prev):
@@ -137,8 +124,6 @@ def SarsaLambda(
     mean_scores = [0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
     episode = 0
     while np.mean(mean_scores[-3:]) < 20 and episode < 10000:
-    # for episode in range(0, num_episode, 1):
-
         print("Episode:", episode, "Avg score: ", np.mean(mean_scores[-2:]), end='\r')
 
         done = False
@@ -148,7 +133,6 @@ def SarsaLambda(
         A = epsilon_greedy_policy(S,done, w)
 
         x = X(S,done,A)
-        # print(x.shape)
 
         z = np.zeros((X.feature_vector_len()))
 
@@ -157,7 +141,6 @@ def SarsaLambda(
         # step = 0
         score_prev = 0
         while not done:
-            # print(step)
             S_prime, R, done, info = env.step(A)
             score = info['score']
             R, score_prev = reward_func(R, done, score, score_prev)

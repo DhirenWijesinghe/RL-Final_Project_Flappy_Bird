@@ -83,7 +83,7 @@ def Q_Learning(
         score_prev = 0
         while not done:
             A = epsilon_greedy_policy(S)
-            S_prime, R, done, info = env.step(A) # R is always 1, so it's irrelevant
+            S_prime, R, done, info = env.step(A)
             score = info['score']
             R, score_prev = reward_func(R, done, score, score_prev)
             max_Q = max(Q.get_q_at_pos(S_prime, 0), Q.get_q_at_pos(S_prime, 1))

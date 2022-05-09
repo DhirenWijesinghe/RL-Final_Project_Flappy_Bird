@@ -89,7 +89,6 @@ def n_step_sarsa(
     episode = 0
     mean_scores = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
     while np.mean(mean_scores[-1*num_consecutive_scores:]) < target_score and episode < num_episodes:
-    # while episode < num_episodes:
         print("Episode:", episode, "Avg score: ", np.mean(mean_scores[-1*num_consecutive_scores:]), end='\r')
         T = np.Infinity
         t = 0
@@ -118,7 +117,6 @@ def n_step_sarsa(
                     G += (gamma ** n) * pi.get_q_at_pos(memory[tau_val+n][0], memory[tau_val+n][1])
                 current_q = pi.get_q_at_pos(memory[tau_val][0], memory[tau_val][1])
                 new_q = current_q + (alpha * (G-current_q))
-                # print(new_q)
                 # if tau_val > 0 and memory[tau_val-1][1] > memory[tau_val][1]:
                 #     new_q += 0.001
                 pi.set_q_value(memory[tau_val][0], memory[tau_val][1], new_q)

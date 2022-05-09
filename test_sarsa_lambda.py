@@ -104,8 +104,6 @@ def test_sarsa_lamda():
             # Checking if the player is still alive
             if done:
                 break
-
-        # print(info['score'])
     env.close()
 
 if __name__ == "__main__":

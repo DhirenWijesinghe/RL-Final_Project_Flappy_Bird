@@ -20,18 +20,11 @@ else:
 
 def test_n_step_sarsa():
 
-    TEST_MODE = True
-
     env = flappy_bird_gym.make("FlappyBird-v0")
-    gamma = 1
-    # env.observation_space.high = [1.8, .8]
-    # env.observation_space.low = [0, -.8]
-
     env.observation_space.high = [2, 2]
     env.observation_space.low = [-2, -2]
 
     num_actions = env.action_space.n
-    # pi = OptimalPolicy(num_actions)
     target_score = 25
 
     if mode == "LEARN":
@@ -50,7 +43,6 @@ def test_n_step_sarsa():
         while True:
             # Next action:
             action = pi.action(obs)
-            # print(action)
             # Processing:
             obs, reward, done, info = env.step(action)
 
@@ -76,7 +68,6 @@ def test_n_step_sarsa():
             while True:
                 # Next action:
                 action = pi.action(obs)
-                # print(action)
                 # Processing:
                 obs, reward, done, info = env.step(action)
 
@@ -104,7 +95,6 @@ def test_n_step_sarsa():
             while True:
                 # Next action:
                 action = pi.action(obs)
-                # print(action)
                 # Processing:
                 obs, reward, done, info = env.step(action)
 
